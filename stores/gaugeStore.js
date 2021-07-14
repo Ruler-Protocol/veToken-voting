@@ -81,7 +81,7 @@ class Store {
           type: 'ruler',
           id: 'ruler',
           name: 'Ruler Protocol',
-          logo: 'https://assets.coingecko.com/coins/images/14183/large/ruler_token.png',
+          logo: 'https://raw.githubusercontent.com/Ruler-Protocol/assets/main/logos/dark_logo.png',
           url: 'https://rulerprotocol.com',
           tokenAddress: "0x2aECCB42482cc64E087b6D2e5Da39f5A7A7001f8",
           veTokenAddress: "0xCe9392aF59c6aC9804FBB5e1492cC52Ff0F17a68",
@@ -187,14 +187,14 @@ class Store {
       address: web3.utils.toChecksumAddress(tokenAddress),
       symbol: await tokenContract.methods.symbol().call(),
       decimals: parseInt(await tokenContract.methods.decimals().call()),
-      logo: `https://assets.coingecko.com/coins/images/14183/large/ruler_token.png`,
+      logo: `https://raw.githubusercontent.com/Ruler-Protocol/assets/main/logos/dark_logo.png`,
     };
 
     const projectVeTokenMetadata = {
       address: web3.utils.toChecksumAddress(veTokenAddress),
       symbol: await veTokenContract.methods.symbol().call(),
       decimals: parseInt(await veTokenContract.methods.decimals().call()),
-      logo: `https://assets.coingecko.com/coins/images/14183/large/ruler_token.png`,
+      logo: `https://raw.githubusercontent.com/Ruler-Protocol/assets/main/logos/light_logo.png`,
     };
 
     project.totalWeight = 0;
