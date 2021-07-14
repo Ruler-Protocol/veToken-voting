@@ -83,7 +83,9 @@ class Store {
           name: 'Ruler Protocol',
           logo: 'https://assets.coingecko.com/coins/images/14183/large/ruler_token.png',
           url: 'https://rulerprotocol.com',
-          gaugeProxyAddress: '0x2e57627ACf6c1812F99e274d0ac61B786c19E74f',
+          tokenAddress: "0x2aECCB42482cc64E087b6D2e5Da39f5A7A7001f8",
+          veTokenAddress: "0xCe9392aF59c6aC9804FBB5e1492cC52Ff0F17a68",
+          gaugeProxyAddress: null,
           gauges: [],
           vaults: [],
           tokenMetadata: {},
@@ -175,170 +177,31 @@ class Store {
     if (!web3) {
       return null;
     }
+    const tokenAddress = project.tokenAddress;
+    const tokenContract = new web3.eth.Contract(ERC20_ABI, tokenAddress);
 
-    const gaugeControllerContract = new web3.eth.Contract(PICKLE_GAUGE_CONTROLLER_ABI, project.gaugeProxyAddress);
+    const veTokenAddress = project.veTokenAddress;
+    const veTokenContract = new web3.eth.Contract(ERC20_ABI, veTokenAddress);
 
-    // get all the gaugesLPTokens
-    const gaugesLPTokens = await gaugeControllerContract.methods.tokens().call();
+    const projectTokenMetadata = {
+      address: web3.utils.toChecksumAddress(tokenAddress),
+      symbol: await tokenContract.methods.symbol().call(),
+      decimals: parseInt(await tokenContract.methods.decimals().call()),
+      logo: `https://assets.coingecko.com/coins/images/14183/large/ruler_token.png`,
+    };
 
-    // get all the gauges
-    const gaugesPromises = gaugesLPTokens.map((token) => {
-      return new Promise((resolve, reject) => {
-        resolve(gaugeControllerContract.methods.getGauge(token).call());
-      });
-    });
+    const projectVeTokenMetadata = {
+      address: web3.utils.toChecksumAddress(veTokenAddress),
+      symbol: await veTokenContract.methods.symbol().call(),
+      decimals: parseInt(await veTokenContract.methods.decimals().call()),
+      logo: `https://assets.coingecko.com/coins/images/14183/large/ruler_token.png`,
+    };
 
-    const gauges = await Promise.all(gaugesPromises);
-
-    // get the gauge relative weights
-    const gaugesRelativeWeightsPromise = gaugesLPTokens.map((token) => {
-      return new Promise((resolve, reject) => {
-        resolve(gaugeControllerContract.methods.weights(token).call());
-      });
-    });
-
-    const gaugesRelativeWeights = await Promise.all(gaugesRelativeWeightsPromise);
-
-    // get LP token info
-    const lpTokensPromise = gaugesLPTokens
-      .map((lpToken) => {
-        const lpTokenContract = new web3.eth.Contract(ERC20_ABI, lpToken);
-
-        const promises = [];
-        const namePromise = new Promise((resolve, reject) => {
-          resolve(lpTokenContract.methods.name().call());
-        });
-        const symbolPromise = new Promise((resolve, reject) => {
-          resolve(lpTokenContract.methods.symbol().call());
-        });
-        const decimalsPromise = new Promise((resolve, reject) => {
-          resolve(lpTokenContract.methods.decimals().call());
-        });
-
-        promises.push(namePromise);
-        promises.push(symbolPromise);
-        promises.push(decimalsPromise);
-
-        return promises;
-      })
-      .flat();
-
-    const lpTokens = await Promise.all(lpTokensPromise);
-
-    const totalWeight = await gaugeControllerContract.methods.totalWeight().call();
-
-    let projectGauges = [];
-    for (let i = 0; i < gauges.length; i++) {
-      const gauge = {
-        address: gauges[i],
-        weight: BigNumber(gaugesRelativeWeights[i]).div(1e18).toNumber(),
-        relativeWeight: BigNumber(gaugesRelativeWeights[i]).times(100).div(totalWeight).toNumber(),
-        lpToken: {
-          address: gaugesLPTokens[i],
-          name: lpTokens[i * 3],
-          symbol: lpTokens[i * 3 + 1],
-          decimals: lpTokens[i * 3 + 2],
-        },
-      };
-
-      projectGauges.push(gauge);
-    }
-
-    async.map(
-      projectGauges,
-      async (projectGauge, callbackInner) => {
-        try {
-          let pLPTokenContract, lpTokenContract, token0, token1, token0Contract, token1Contract, token0Symbol, token1Symbol, token;
-          switch (projectGauge.lpToken.symbol) {
-            case 'pSLP':
-            case 'pUNI-V2':
-              pLPTokenContract = new web3.eth.Contract(PICKLE_GAUGE_ABI, projectGauge.lpToken.address);
-
-              token = await pLPTokenContract.methods.token().call();
-
-              lpTokenContract = new web3.eth.Contract(SUSHISWAP_LP_TOKEN_ABI, token);
-              token0 = await lpTokenContract.methods.token0().call();
-              token1 = await lpTokenContract.methods.token1().call();
-
-              token0Contract = new web3.eth.Contract(ERC20_ABI, token0);
-              token0Symbol = await token0Contract.methods.symbol().call();
-
-              token1Contract = new web3.eth.Contract(ERC20_ABI, token1);
-              token1Symbol = await token1Contract.methods.symbol().call();
-
-              if (projectGauge.lpToken.symbol === 'pSLP') {
-                projectGauge.lpToken.symbol = `pSLP (${token0Symbol}/${token1Symbol})`;
-              } else {
-                projectGauge.lpToken.symbol = `pUNI-V2 (${token0Symbol}/${token1Symbol})`;
-              }
-
-              break;
-            case 'UNI-V2':
-              lpTokenContract = new web3.eth.Contract(UNISWAP_LP_TOKEN_ABI, projectGauge.lpToken.address);
-              token0 = await lpTokenContract.methods.token0().call();
-              token1 = await lpTokenContract.methods.token1().call();
-
-              token0Contract = new web3.eth.Contract(ERC20_ABI, token0);
-              token0Symbol = await token0Contract.methods.symbol().call();
-
-              token1Contract = new web3.eth.Contract(ERC20_ABI, token1);
-              token1Symbol = await token1Contract.methods.symbol().call();
-
-              projectGauge.lpToken.symbol = `UNI-V2 (${token0Symbol}/${token1Symbol})`;
-
-              break;
-            case 'p3Crv':
-            case 'psteCRV':
-              break;
-            default:
-          }
-          callbackInner(null, projectGauge);
-        } catch (ex) {
-          console.log(projectGauge);
-          console.log(ex);
-          callbackInner(ex);
-        }
-      },
-      async (err, projectGauges) => {
-        if (err) {
-          callback(err);
-          return;
-        }
-
-        const totalWeight = await gaugeControllerContract.methods.totalWeight().call();
-
-        const tokenAddress = await gaugeControllerContract.methods.PICKLE().call();
-        const tokenContract = new web3.eth.Contract(ERC20_ABI, tokenAddress);
-
-        const veTokenAddress = await gaugeControllerContract.methods.DILL().call();
-        const veTokenContract = new web3.eth.Contract(ERC20_ABI, veTokenAddress);
-
-        const projectTokenMetadata = {
-          address: web3.utils.toChecksumAddress(tokenAddress),
-          symbol: await tokenContract.methods.symbol().call(),
-          decimals: parseInt(await tokenContract.methods.decimals().call()),
-          logo: `https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/${web3.utils.toChecksumAddress(
-            tokenAddress,
-          )}/logo.png`,
-        };
-
-        const projectVeTokenMetadata = {
-          address: web3.utils.toChecksumAddress(veTokenAddress),
-          symbol: await veTokenContract.methods.symbol().call(),
-          decimals: parseInt(await veTokenContract.methods.decimals().call()),
-          logo: `https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/${web3.utils.toChecksumAddress(
-            veTokenAddress,
-          )}/logo.png`,
-        };
-
-        project.totalWeight = BigNumber(totalWeight).div(1e18).toNumber();
-        project.tokenMetadata = projectTokenMetadata;
-        project.veTokenMetadata = projectVeTokenMetadata;
-        project.gauges = projectGauges;
-
-        callback(null, project);
-      },
-    );
+    project.totalWeight = 0;
+    project.tokenMetadata = projectTokenMetadata;
+    project.veTokenMetadata = projectVeTokenMetadata;
+    console.log(project)
+    callback(null, project);
   };
 
   _getProjectDataPickle = async (project, callback) => {
