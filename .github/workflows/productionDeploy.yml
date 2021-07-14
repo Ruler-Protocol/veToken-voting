@@ -1,0 +1,30 @@
+name: Production Build Deployment
+on:
+  push:
+    branches:
+      - master
+env:
+  NEXT_PUBLIC_PROVIDER: ${{ secrets.NEXT_PUBLIC_PROVIDER }}
+  NODE_ENV: production
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 12
+
+      - name: Install dependencies
+        run: |
+          npm install .
+      - name: Create a production bundle.
+        run: |
+          npm run build2
+      - name: Deploy to Firebase
+        uses: w9jds/firebase-action@master
+        with:
+          args: deploy --only hosting
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
