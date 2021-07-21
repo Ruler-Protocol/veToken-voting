@@ -114,7 +114,7 @@ function Header(props) {
   };
 
   useEffect(function () {
-    const localStorageDarkMode = window.localStorage.getItem('yearn.finance-dark-mode');
+    const localStorageDarkMode = window.localStorage.getItem('rulerprotocol-dark-mode');
     setDarkMode(localStorageDarkMode ? localStorageDarkMode === 'dark' : false);
   }, []);
 

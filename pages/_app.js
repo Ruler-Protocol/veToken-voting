@@ -31,7 +31,7 @@ export default function MyApp({ Component, pageProps }) {
 
   const changeTheme = (dark) => {
     setThemeConfig(dark ? darkTheme : lightTheme);
-    localStorage.setItem('yearn.finance-dark-mode', dark ? 'dark' : 'light');
+    localStorage.setItem('rulerprotocol-dark-mode', dark ? 'dark' : 'light');
   };
 
   const configureReturned = () => {
@@ -39,7 +39,7 @@ export default function MyApp({ Component, pageProps }) {
   };
 
   useEffect(function () {
-    const localStorageDarkMode = window.localStorage.getItem('yearn.finance-dark-mode');
+    const localStorageDarkMode = window.localStorage.getItem('rulerprotocol-dark-mode');
     changeTheme(localStorageDarkMode ? localStorageDarkMode === 'dark' : false);
   }, []);
 
