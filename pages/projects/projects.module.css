@@ -1,17 +1,19 @@
 .container {
-  display: grid;
+  display: flex;
+  justify-content: center;
   grid-template-columns: 700px 1fr;
   position: relative;
   box-sizing: border-box;
-  background: #FFF;
+  background: #f3f3f3;
 }
 
 .containerDark {
-  display: grid;
+  display: flex;
+  justify-content: center;
   grid-template-columns: 700px 1fr;
   position: relative;
   box-sizing: border-box;
-  background: #2b2e3c;
+  background: #22252E;
 }
 
 .copyCentered {
@@ -77,7 +79,7 @@
 }
 
 .helpingUnderline {
-  color: #2f80ed;
+  color: #af2a2a;
 }
 
 .helpingParagraph {
@@ -116,7 +118,6 @@
 .projectsLoadingSpace {
   margin-right: 24px;
 }
-
 
 @media screen and (max-width: 1700px) {
   .cardsContainer {

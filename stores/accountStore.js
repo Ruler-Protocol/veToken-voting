@@ -75,7 +75,6 @@ class Store {
 
   setStore(obj) {
     this.store = { ...this.store, ...obj };
-    console.log(this.store);
     return this.emitter.emit(STORE_UPDATED);
   }
 
