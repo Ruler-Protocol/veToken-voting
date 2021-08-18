@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Typography, Paper, Button, CircularProgress } from '@material-ui/core';
 import Skeleton from '@material-ui/lab/Skeleton';
 import { withTheme } from '@material-ui/core/styles';
+import Footer from '../../components/footer';
 
 import Layout from '../../components/layout/layout.js';
 import ProjectCard from '../../components/projectCard';
@@ -45,10 +46,10 @@ function Projects({ changeTheme, theme }) {
       <div className={theme.palette.type === 'dark' ? classes.containerDark : classes.container}>
         <div className={classes.copyContainer}>
           <div className={classes.copyCentered}>
-            <Typography variant="h1" className={classes.chainListSpacing} style={{ textAlign: 'center' }}>
+            <Typography variant="h1" className={classes.chainListSpacing}>
               <span className={classes.helpingUnderline}>veRULER</span>
             </Typography>
-            <Typography variant="h2" className={classes.helpingParagraph} style={{ textAlign: 'center' }}>
+            <Typography variant="h2" className={classes.helpingParagraph}>
               Lock RULER to earn protocol fees, collect emissions, and vote on reward gauges
             </Typography>
             <Button
@@ -64,8 +65,8 @@ function Projects({ changeTheme, theme }) {
             </Button>
           </div>
         </div>
-        {/* <div className={theme.palette.type === 'dark' ? classes.listContainerDark : classes.listContainer}>
-          <div className={theme.palette.type === 'dark' ? classes.headerContainerDark : classes.headerContainer}>
+        <div className={`${theme.palette.type === 'dark' ? classes.listContainerDark : classes.listContainer} ${classes.listContainer}`}>
+          <div className={`${theme.palette.type === 'dark' ? classes.headerContainerDark : classes.headerContainer} ${classes.headerContainer}`}>
             <Header changeTheme={changeTheme} />
           </div>
           {loading && (
@@ -76,16 +77,16 @@ function Projects({ changeTheme, theme }) {
               <CircularProgress size={15} />
             </div>
           )}
-          {!loading && (
-            <div className={classes.cardsContainer}>
-              {projects &&
-                projects.length > 0 &&
-                projects.map((project, idx) => {
-                  return <ProjectCard key={idx} project={project} />;
-                })}
-            </div>
-          )}
-        </div> */}
+        </div>
+      </div>
+      <div
+        style={{
+          position: 'fixed',
+          bottom: 0,
+          left: '70px'
+        }}
+      >
+        <Footer />
       </div>
     </Layout>
   );
