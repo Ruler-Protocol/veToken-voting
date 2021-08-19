@@ -59,7 +59,7 @@ function Projects({ changeTheme, theme }) {
               size="large"
               onClick={() => router.push('/project/ruler')}
               className={classes.button}
-              style={{ backgroundColor: '#af2a2a' }}
+              style={{ backgroundColor: '#af2a2a', color: '#fff' }}
             >
               <Typography variant="h5">{`Open Gauge`}</Typography>
             </Button>
