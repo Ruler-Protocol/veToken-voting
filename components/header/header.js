@@ -126,7 +126,16 @@ function Header(props) {
             <ArrowBackIcon />
           </Button>
         </div>
-      )}{' '}
+      ) || 
+        <div className={classes.backButton}>
+          <img 
+            src={`https://raw.githubusercontent.com/Ruler-Protocol/assets/main/logos/${props.theme.palette.type}_logo.png`}
+            alt="RULER" 
+            width={70} 
+            height={70} 
+          />
+        </div>
+      }{' '}
       <div className={classes.themeSelectContainer}>
         <StyledSwitch
           icon={<Brightness2Icon className={classes.switchIcon} />}
